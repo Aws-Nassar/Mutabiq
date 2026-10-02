@@ -1,0 +1,127 @@
+# Topics that must ALWAYS produce status REFER and never an answer.
+#
+# Semantics (enforced in app/sensitive.py):
+#   - Matching is case-insensitive and whitespace-normalized.
+#   - `terms` are matched on TOKEN boundaries, not as substrings. This matters:
+#     the substring "دم" appears inside "مدير" (a manager) and "دم" (blood) would
+#     otherwise fire on any question containing the word "manager".
+#   - Matching runs against BOTH the raw user question and the restated one.
+#     The restated question is formal Arabic, so the raw question is what catches
+#     colloquial phrasings.
+#
+# Two rules govern this file:
+#   1. Adding a group is always safe and cheap. Removing one is a scientific
+#      decision, not a convenience: it changes what the system is allowed to answer.
+#   2. Prefer multiple spellings over clever regexes. Users type colloquially and
+#      in several dialects, and Arabic morphology will defeat most patterns.
+#      Normalization elsewhere unifies alef/yaa/taa-marbuta, so list one spelling.
+
+version: 1
+
+groups:
+  # ---------------------------------------------------------------------
+  - id: divorce_oaths_vows
+    label_ar: الطلاق والأيمان والنذور
+    terms:
+      - الطلاق
+      - طلقني
+      - تطلقني
+      - طلقت
+      - الخلع
+      - المهر
+      - اليمين
+      - أيمان
+      - حلفت
+      - حلف
+      - قسمة
+      - النذر
+      - نذرت
+      - نذر
+      - divorce
+      - vow
+      - oath
+
+  # ---------------------------------------------------------------------
+  - id: bloodshed_violence
+    label_ar: الدماء والعنف
+    terms:
+      - القتل
+      - قتلت
+      - قتل
+      - سفك الدماء
+      - الاعتداء
+      - الاعتداء عليه
+      - خنق
+      - ذبح
+      - الجزاء
+      - القصاص
+      - الثأر
+      - murder
+      - violence
+      - revenge
+
+  # ---------------------------------------------------------------------
+  - id: takfir
+    label_ar: التكفير
+    terms:
+      - كافر
+      - تكفير
+      - تكفر
+      - خرج من الإسلام
+      - ارتد
+      - يرتد
+      - الردة
+      - apostasy
+      - takfir
+
+  # ---------------------------------------------------------------------
+  - id: medical_emergency
+    label_ar: حالات الضرورة الطبية والطوارئ
+    terms:
+      - حالة طوارئ
+      - حالة طارئة
+      - طوارئ
+      - إنقاذ
+      - جلطة
+      - إغماء
+      - تخدير
+      - عملية جراحية
+      - مرض
+      - Terminal
+      - داء
+      - terminal
+      - coma
+      - emergency
+      - ICU
+      - الإنعاش
+
+  # ---------------------------------------------------------------------
+  - id: ruling_on_named_individual
+    label_ar: الحكم على شخص بعينه
+    description: >-
+      Asking whether a specific person acted rightly or wrongly. Judging named
+      individuals is explicitly out of scope per the organizer's reference
+      (المرجعية_الشرعية.pdf p.2). Terms are chosen as THIRD-PARTY markers: they
+      fire when the user is asking about someone else rather than about their own
+      situation.
+    terms:
+      - صديقي
+      - صديقه
+      - جاري
+      - جاره
+      - جيران
+      - زميلي
+      - زميل
+      - مديري
+      - معلم
+      - معلمي
+      - والدي
+      - والدتي
+      - زوجته
+      - زوجي
+      - أخي
+      - أختي
+      - ابني
+      - ابنتي
+      - فلان
+      - المدعي عليه

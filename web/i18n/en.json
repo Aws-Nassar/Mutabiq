@@ -1,0 +1,12 @@
+{
+ "title": "Mutabiq — مُطابِق",
+ "subtitle": "Arabic-first retrieval of published fatwas. No AI ruling generated.",
+ "placeholder": "Describe your question (Arabic or any language)",
+ "search": "Search",
+ "clear": "Clear",
+ "top3": "Top 3 results • Retrieval only",
+ "retrieval_only": "Retrieval only",
+ "no_matches": "No matches found.",
+ "error": "Error",
+ "verbatim_notice": "Quoted text is verbatim from the source."
+}

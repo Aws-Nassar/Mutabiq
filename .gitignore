@@ -1,0 +1,42 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Corpus and derived artifacts.
+# Fatwa texts are republished material from islamqa.info and are NOT ours to
+# distribute, so the raw dump and the built corpus stay out of git.
+# scripts/fetch_corpus.py rebuilds data/raw/; scripts/ingest.py rebuilds the corpus.
+# See docs/sources.md for the license question and AGENTS.md for the policy.
+data/raw/*
+!data/raw/.gitkeep
+data/corpus.jsonl
+data/index/*
+!data/index/.gitkeep
+
+# Samples that are explicitly cleared for publication (small, permitted subset only).
+data/samples/
+
+# Model caches and eval scratch
+.cache/
+*.npy
+*.pkl
+.eval_cache/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

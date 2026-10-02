@@ -1,0 +1,100 @@
+# Mutabiq configuration.
+# User-facing copy lives in web/i18n, not here. This file is for behaviour only.
+
+app:
+  name: Mutabiq
+  # The corpus text shown to users is the Arabic original. Other languages of a
+  # fatwa are served from the same numeric id at islamqa.info/{lang}/answers/{id}.
+  display_language: ar
+  max_question_chars: 500
+  results_returned: 3
+
+corpus:
+  path: data/corpus.jsonl
+  index_dir: data/index
+  source_name: islamqa.info
+  source_license: "TODO: republication not yet confirmed with organizers"
+  # Root category: الصلاة / Prayer on islamqa.info.
+  root_topic_id: 70
+  # Verified descendants of topic 70. Read off the live topic-70 page on
+  # 2026-10-02; every leaf count in brackets is the site's own "الإجابات" number.
+  #
+  # The category tree on the page is nested inside the GLOBAL topic sidebar, so
+  # subtree membership cannot be recovered from the DOM reliably. The list below
+  # is therefore explicit and verified rather than auto-discovered, so an
+  # accidental crawl into Zakat/Hajj/etc. is impossible.
+  #
+  # NOTE: 56/57/58 (الفقه / عبادات / الطهارة) are ANCESTORS of الصلاة, not part
+  # of it, and are deliberately excluded.
+  prayer_subtree:
+    - {id: 70, name: "الصلاة"}
+    - {id: 71, name: "أحكام الصلاة"}
+    - {id: 77, name: "تارك الصلاة", listed_count: 99}
+    - {id: 78, name: "قضاء الفوائت", listed_count: 66}
+    - {id: 79, name: "مواقيت الصلاة", listed_count: 75}
+    - {id: 80, name: "الأذان", listed_count: 117}
+    - {id: 81, name: "أحكام المساجد", listed_count: 278}
+    - {id: 82, name: "السهو", listed_count: 113}
+    - {id: 83, name: "أهل الأعذار"}
+    - {id: 86, name: "الإمامة", listed_count: 214}
+    - {id: 87, name: "القراءة في الصلاة", listed_count: 70}
+    - {id: 88, name: "صلاة الجماعة"}
+    - {id: 90, name: "صلوات في مناسبات مختلفة"}
+    - {id: 94, name: "صلاة النافلة"}
+    - {id: 97, name: "سجود التلاوة والشكر", listed_count: 53}
+    - {id: 98, name: "صفة الصلاة", listed_count: 135}
+
+retrieval:
+  bm25:
+    # Rank fusion constant. Standard value from the RRF paper; do not tune it
+    # against the eval set, it is not a quality knob.
+    k1: 1.5
+    b: 0.75
+  dense:
+    # Task 3 owns this. Must fit in 512 MB alongside Python + FastAPI.
+    # bge-m3 is too large (568M params) and must not be used here.
+    backend: onnx
+    model: intfloat/multilingual-e5-small
+    quantization: int8
+    batch_size: 16
+    max_seq_length: 256
+  fusion:
+    method: rrf
+    k: 60
+    # Ranking depth taken from each retriever before merging.
+    depth_per_retriever: 50
+  keyword:
+    # LLM-generated fiqh terms matched against fatwa titles and category paths.
+    max_terms: 6
+
+status:
+  # Thresholds are TUNED ON THE DEV SPLIT ONLY. Never tune on test.
+  # See results/report.md for how the current values were chosen.
+  supported_min_score: 0.60
+  supported_min_margin: 0.05
+  refer_max_score: 0.35
+  # Any topic in config/sensitive_topics.yaml forces REFER regardless of score.
+  sensitive_forces_refer: true
+
+llm:
+  # Fallback order. Tried in order; LLMUnavailable is raised when all fail.
+  providers:
+    - gemini
+    - groq
+    - openrouter
+  timeout_seconds: 20
+  max_retries: 2
+
+referral:
+  # Shown when status is REFER. Kept configurable so the authority list can
+  # change without touching code.
+  authorities:
+    - name: الإسلام سؤال وجواب
+      url: https://islamqa.info/ar/ask
+    - name: دار الإسلام
+      url: https://islamhouse.net/ar/ask
+
+fetch:
+  delay_seconds: 1.5
+  max_pages: 200
+  timeout_seconds: 30

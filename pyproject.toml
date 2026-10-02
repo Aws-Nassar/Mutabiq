@@ -1,0 +1,53 @@
+[project]
+name = "mutabiq"
+version = "0.1.0"
+description = "Arabic-first retrieval tool that returns published fatwas verbatim with source and evidence status"
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "httpx>=0.27",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.1",
+]
+
+[project.optional-dependencies]
+# The embedding stack is deliberately optional and deliberately separate.
+# Render's free tier caps the process at 512 MB, and torch alone would blow
+# through most of that. Task 3 owns the model choice and the quantization
+# strategy; see docs/method.md once it is decided. If the model cannot be
+# loaded at runtime we degrade to BM25-only retrieval (AGENTS.md hard rule 6).
+embeddings = ["onnxruntime>=1.18", "tokenizers>=0.19", "huggingface-hub>=0.22"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app", "app.text"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = [
+    "E501",    # long Arabic display strings are unavoidable in this project
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may use fixtures and local imports freely.
+"tests/*" = ["B011"]
