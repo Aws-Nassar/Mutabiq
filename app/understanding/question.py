@@ -16,6 +16,10 @@ class QuestionUnderstanding:
     restated_arabic: str
     keywords: list[str]
     language: str | None = None
+    # True when the LLM was unavailable/failed and we fell back to the raw
+    # question. Callers use this to show the hard-rule-6 degradation notice
+    # and to be conservative in evidence status.
+    degraded: bool = False
 
 
 def restate_question(provider: Any | None, question: str) -> QuestionUnderstanding:
@@ -25,7 +29,7 @@ def restate_question(provider: Any | None, question: str) -> QuestionUnderstandi
     # If no provider, do a conservative pass: return trimmed original
     if provider is None:
         q = question.strip()
-        return QuestionUnderstanding(restated_arabic=q, keywords=[])
+        return QuestionUnderstanding(restated_arabic=q, keywords=[], degraded=True)
 
     prompt = (
         "You are an assistant for Islamic fatwa retrieval. "
@@ -39,7 +43,9 @@ def restate_question(provider: Any | None, question: str) -> QuestionUnderstandi
     try:
         out = provider.complete(prompt, max_tokens=200, temperature=0)
     except Exception:
-        return QuestionUnderstanding(restated_arabic=question.strip(), keywords=[])
+        return QuestionUnderstanding(restated_arabic=question.strip(), keywords=[], degraded=True)
 
     out = out.strip().strip('"').strip("'")
-    return QuestionUnderstanding(restated_arabic=out or question.strip(), keywords=[])
+    if not out:
+        return QuestionUnderstanding(restated_arabic=question.strip(), keywords=[], degraded=True)
+    return QuestionUnderstanding(restated_arabic=out, keywords=[])

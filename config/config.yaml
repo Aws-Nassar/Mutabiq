@@ -51,11 +51,14 @@ retrieval:
     k1: 1.5
     b: 0.75
   dense:
-    # Task 3 owns this. Must fit in 512 MB alongside Python + FastAPI.
+    # Must fit in 512 MB alongside Python + FastAPI.
     # bge-m3 is too large (568M params) and must not be used here.
-    backend: onnx
+    # multilingual-e5-small (~118M params) is the largest model that fits.
+    # The model is lazy-loaded at runtime; if it fails to load, we degrade
+    # to BM25-only retrieval (hard rule 6).
+    backend: sentence_transformers
     model: intfloat/multilingual-e5-small
-    quantization: int8
+    quantization: none
     batch_size: 16
     max_seq_length: 256
   fusion:

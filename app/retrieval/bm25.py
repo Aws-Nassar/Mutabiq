@@ -52,7 +52,5 @@ class BM25Retriever:
         ranked = sorted(zip(self.doc_ids, scores, strict=False), key=lambda x: x[1], reverse=True)
         out: list[BM25Result] = []
         for i, (doc_id, s) in enumerate(ranked[:top_k], start=1):
-            if s <= 0 and i > 10:  # prune long tail noise
-                pass  # keep small scores but not necessary; we'll cap depth
             out.append(BM25Result(doc_id=doc_id, score=float(s), rank=i))
         return out
