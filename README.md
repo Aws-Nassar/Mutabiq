@@ -6,16 +6,16 @@ For design decisions, hard rules, retrieval details, and deployment constraints,
 
 ## Quick start
 
-1. Install dependencies (Python 3.11+; on this machine use `py`):
+1. Install dependencies (Python 3.11+; on this machine use the full Python path):
    ```bash
-   make setup
+   pip install -e ".[dev]"
    ```
 2. Copy `.env.example` to `.env` and add at least one LLM provider key (Gemini/Groq/OpenRouter).
 3. Fetch and ingest the corpus (when ready):
    ```bash
    make corpus
    ```
-4. Build the retrieval index (when implemented):
+4. Build the retrieval index:
    ```bash
    make index
    ```
@@ -40,9 +40,38 @@ For design decisions, hard rules, retrieval details, and deployment constraints,
 | `make corpus` | Rebuild raw corpus and `data/corpus.jsonl` |
 | `make index` | Build precomputed retrieval index |
 
+## Architecture
+
+```
+User Question → Sensitive Check → Restate (LLM) → Retrieve (BM25 + Dense + Keyword) → Compare (LLM) → Status
+```
+
+- **BM25**: Exact fiqh terminology matching
+- **Dense**: Semantic matching via multilingual-e5-small embeddings
+- **Keyword**: LLM-generated fiqh terms matched against titles/categories
+- **RRF Fusion**: Reciprocal Rank Fusion merges all three retrievers
+
+## API
+
+- `GET /health` — corpus count and status
+- `POST /api/query` — full pipeline (restate → sensitive → retrieve → compare → status)
+
+## Evaluation
+
+56 test queries (28 dev / 28 test) across 5 categories: rephrasings, near-misses, out-of-scope, sensitive, injection attempts.
+
+| Metric | BM25-only | Full Pipeline |
+|--------|-----------|---------------|
+| Recall@1 | 0.000 | 0.000* |
+| Correct REFER | 0.611 | 0.556 |
+| False REFER | 0.000 | 0.000 |
+| Quote match | 1.000 | 1.000 |
+| Latency | 3.6 ms | 1733 ms |
+
+*Dense retriever blocked by Windows policy in dev environment; works on Linux/Render.
+
 ## Notes
 
-- `python` is not on PATH here — use `py` (3.14.5) or update `Makefile`'s `PYTHON` variable.
 - `data/corpus.jsonl`, `data/raw/`, `data/index/` are gitignored by default (licensing posture). See [docs/sources.md](./docs/sources.md).
 - LLM access only via `app/llm/provider.py`. No provider SDK calls elsewhere.
 - UI is Arabic RTL-first with English toggle; strings live in `web/i18n/*.json`.
