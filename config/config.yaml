@@ -13,7 +13,7 @@ validation:
   min_question_length: 4
 
 corpus:
-  path: data/corpus.jsonl
+  path: data/corpus_merged.jsonl
   index_dir: data/index
   source_name: islamqa.info
   source_license: "TODO: republication not yet confirmed with organizers"

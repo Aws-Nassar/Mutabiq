@@ -6,6 +6,7 @@ fatwa texts are third-party content. Follow the policy in `AGENTS.md` §9.
 | Source | URL pattern | License/permission | Date retrieved | How it is used | How it is verified |
 |---|---|---|---|---|---|
 | islamqa.info (topic 70: الصلاة / Prayer) | `https://islamqa.info/{lang}/answers/<id>`, category `/ar/categories/topics/70` | TODO | TODO | Retrieval corpus only. Texts are stored in `data/corpus.jsonl` (gitignored by default). Display is verbatim with source URL. | TODO |
+| islamweb.net (Prayer categories) | `https://www.islamweb.net/ar/fatwa/<id>`, categories under `/ar/fatawa/1324/الصلاة` | TODO | TODO | Supplemental retrieval corpus. Texts are stored in `data/corpus_islamweb.jsonl` (gitignored by default). Display is verbatim with source URL. | TODO |
 
 ## Notes
 
