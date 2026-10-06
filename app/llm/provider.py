@@ -34,7 +34,7 @@ class Provider:
             raise RuntimeError("GEMINI_API_KEY not set")
         import httpx
 
-        model = kwargs.get("model") or os.getenv("GEMINI_MODEL") or "gemini-2.5-flash-lite"
+        model = kwargs.get("model") or os.getenv("GEMINI_MODEL") or "gemini-flash-latest"
         temperature = kwargs.get("temperature", 0)
         max_tokens = kwargs.get("max_tokens", 256)
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
@@ -62,7 +62,7 @@ class Provider:
             raise RuntimeError("GROQ_API_KEY not set")
         import httpx
 
-        model = kwargs.get("model") or os.getenv("GROQ_MODEL") or "llama-3.1-8b-instant"
+        model = kwargs.get("model") or os.getenv("GROQ_MODEL") or "qwen/qwen3.8-27b"
         temperature = kwargs.get("temperature", 0)
         max_tokens = kwargs.get("max_tokens", 256)
         url = "https://api.groq.com/openai/v1/chat/completions"
