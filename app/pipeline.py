@@ -15,6 +15,7 @@ Single orchestration point used by the API (and CLI). Invariants enforced here:
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -127,11 +128,12 @@ class Pipeline:
         self.by_id = {r["id"]: r for r in self.records}
 
         self.bm25 = bm25.BM25Retriever(self.records)
-        self.dense = (
-            dense.DenseRetriever(index_dir, self.config)
-            if (index_dir / "dense.npy").exists()
-            else None
-        )
+        self.dense = None
+        if os.getenv("DISABLE_DENSE") != "1" and (index_dir / "dense.npy").exists():
+            try:
+                self.dense = dense.DenseRetriever(index_dir, self.config)
+            except Exception:
+                self.dense = None
         self.keyword = keyword.KeywordRetriever(
             self.records, max_terms=self.config.get("retrieval", {}).get("keyword", {}).get("max_terms", 6)
         )
