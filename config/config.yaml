@@ -82,7 +82,6 @@ status:
 llm:
   # Fallback order. Tried in order; LLMUnavailable is raised when all fail.
   providers:
-    - gemini
     - groq
     - openrouter
   timeout_seconds: 20
