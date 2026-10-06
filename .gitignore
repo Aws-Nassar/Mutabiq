@@ -37,3 +37,15 @@ Thumbs.db
 
 # User screenshots folder (local debugging only)
 ScreenShots_ignoreIt/
+
+# Local logs and scratch artifacts (never commit)
+*.log
+*.err
+bing_resurt.html
+deck_info.txt
+template_info.txt
+scripts/build_deck.py
+Challenge_Files/template.pptx
+
+# Eval outputs — regenerate with `make eval`
+results/
