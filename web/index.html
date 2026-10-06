@@ -535,36 +535,37 @@
       color: var(--gold);
     }
     .history-item {
-      padding: 0.75rem 1rem;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      margin-bottom: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: background 0.2s;
     }
-    .history-item:hover {
-      background: var(--green-50);
-    }
-    [data-theme="dark"] .history-item:hover {
-      background: #1A2F1F;
-    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item:hover { background: var(--green-50); }
+    [data-theme="dark"] .history-item:hover { background: #1A2F1F; }
     .history-item .q {
-      font-size: 0.95rem;
-      margin-bottom: 0.25rem;
-      display: block;
-      word-break: break-word;
-      overflow-wrap: break-word;
-      line-height: 1.6;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
-    .history-item .q .status-badge {
-      display: inline-block;
-      margin-bottom: 0.25rem;
-      margin-right: 0;
+    .history-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
+    .dot-SUPPORTED { background: #43A047; }
+    .dot-NEEDS_VERIFICATION { background: #FBC02D; }
+    .dot-REFER { background: #E53935; }
     .history-item .meta {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      word-break: break-all;
+      margin-top: 0.15rem;
     }
     .history-empty {
       color: var(--muted);
@@ -962,7 +963,11 @@
       history.forEach(item => {
         const div = document.createElement('div');
         div.className = 'history-item';
-        div.innerHTML = '<div class="q"><span class="status-badge status-' + (item.full_response.status || 'REFER') + '">' + (item.full_response.status || 'REFER') + '</span>' + item.question + '</div><div class="meta">' + new Date(item.timestamp).toLocaleString() + '</div>';
+        const status = item.full_response.status || 'REFER';
+        const qShort = item.question.length > 60 ? item.question.slice(0, 60) + '…' : item.question;
+        const d = new Date(item.timestamp);
+        const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        div.innerHTML = '<div class="q"><span class="history-dot dot-' + status + '"></span>' + qShort + '</div><div class="meta">' + dateStr + '</div>';
         div.addEventListener('click', () => {
           renderResults(item.full_response);
         });
