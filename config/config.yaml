@@ -69,6 +69,12 @@ retrieval:
     k: 60
     # Ranking depth taken from each retriever before merging.
     depth_per_retriever: 50
+  cross_source_fallback:
+    # If the top result is from islamqa and its score is below this threshold,
+    # also search the islamweb-only index and return whichever source has the
+    # higher-scoring top result.
+    enabled: true
+    trigger_threshold: 0.70
   keyword:
     # LLM-generated fiqh terms matched against fatwa titles and category paths.
     max_terms: 6

@@ -130,6 +130,10 @@ class Pipeline:
         self.by_id = {r["id"]: r for r in self.records}
 
         self.bm25 = bm25.BM25Retriever(self.records)
+        self.bm25_islamweb = None
+        islamweb_records = [r for r in self.records if r.get("source_name") == "islamweb.net"]
+        if islamweb_records:
+            self.bm25_islamweb = bm25.BM25Retriever(islamweb_records)
         self.dense = None
         if os.getenv("DISABLE_DENSE") != "1" and (index_dir / "dense.npy").exists():
             try:
@@ -270,6 +274,49 @@ class Pipeline:
         if candidates and denom > 0:
             for c in candidates:
                 c.match_score = min(1.0, c.rrf_score / denom)
+
+        # --- Cross-source fallback: if top result is from islamqa with low
+        # confidence, check islamweb-only for a better match ---
+        xsf_cfg = self.config.get("retrieval", {}).get("cross_source_fallback", {})
+        if (
+            xsf_cfg.get("enabled", True)
+            and candidates
+            and self.bm25_islamweb is not None
+        ):
+            top = candidates[0]
+            threshold = float(xsf_cfg.get("trigger_threshold", 0.70))
+            if top.match_score < threshold and top.id.startswith("islamqa-"):
+                islamweb_hits = self.bm25_islamweb.query(restated, top_k=top_k)
+                if islamweb_hits:
+                    # BM25 raw scores are comparable within the same index;
+                    # normalize against the best possible score for this query.
+                    best_possible = islamweb_hits[0].score
+                    if best_possible > 0:
+                        islamweb_candidates = []
+                        for i, h in enumerate(islamweb_hits[:top_k]):
+                            rec = self.by_id.get(h.doc_id)
+                            if not rec:
+                                continue
+                            islamweb_candidates.append(
+                                Candidate(
+                                    id=rec["id"],
+                                    url=rec["url"],
+                                    title=rec.get("title", ""),
+                                    question=rec.get("question", ""),
+                                    answer=rec.get("answer", ""),
+                                    summary=rec.get("summary", ""),
+                                    category=rec.get("category", ""),
+                                    match_score=min(1.0, h.score / best_possible),
+                                    rrf_score=0.0,
+                                    sources={"islamweb_bm25": 1.0},
+                                    excerpts=[],
+                                )
+                            )
+                        if islamweb_candidates:
+                            # Compare: use islamweb if its top score is higher
+                            # than the islamqa top score.
+                            if islamweb_candidates[0].match_score > top.match_score:
+                                candidates = islamweb_candidates
 
         if not candidates:
             # Fallback to live search when local corpus yields nothing

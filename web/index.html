@@ -373,6 +373,21 @@
       color: var(--danger);
       border: 1px solid #EF9A9A;
     }
+    .source-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--green-100);
+      color: var(--green-800);
+      border: 1px solid #C8E6C9;
+    }
+    [data-theme="dark"] .source-badge {
+      background: #1B3A1F;
+      color: #81C784;
+      border-color: #2E5A2F;
+    }
 
     /* Comparison section */
     .comparison {
@@ -841,6 +856,10 @@
         badge.className = 'status-badge status-' + data.status;
         badge.textContent = statusLabel(data.status);
         h3.appendChild(badge);
+        const sourceBadge = document.createElement('span');
+        sourceBadge.className = 'source-badge';
+        sourceBadge.textContent = c.id.startsWith('islamweb-') ? 'islamweb' : 'islamqa';
+        h3.appendChild(sourceBadge);
         h3.appendChild(document.createTextNode(c.title || '(untitled)'));
         div.appendChild(h3);
 
