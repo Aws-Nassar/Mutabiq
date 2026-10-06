@@ -28,6 +28,7 @@ from app.status.evidence import EvidenceStatus, determine_status
 from app.text import arabic
 from app.understanding import compare as cases
 from app.understanding import question as understand
+from app.validate import validate_question
 
 
 @dataclass
@@ -166,6 +167,22 @@ class Pipeline:
             )
 
         norm = arabic.text_search_from_display(original)
+
+        # --- Input validation (nonsense, profanity, off-topic, injection) ---
+        val_cfg = self.config.get("validation", {})
+        if val_cfg.get("enabled", True):
+            vr = validate_question(original, max_length=int(val_cfg.get("max_question_chars", 500)))
+            if not vr.ok:
+                return QueryResult(
+                    query_original=original,
+                    query_restated="",
+                    query_normalized=norm,
+                    llm_degraded=False,
+                    notice=vr.notice,
+                    status=EvidenceStatus.REFER,
+                    sensitive_group=None,
+                    candidates=[],
+                )
 
         from app.sensitive import topics as sens
 

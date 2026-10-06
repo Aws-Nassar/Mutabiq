@@ -3,11 +3,14 @@
 
 app:
   name: Mutabiq
-  # The corpus text shown to users is the Arabic original. Other languages of a
-  # fatwa are served from the same numeric id at islamqa.info/{lang}/answers/{id}.
   display_language: ar
   max_question_chars: 500
   results_returned: 3
+
+validation:
+  enabled: true
+  max_question_chars: 500
+  min_question_length: 4
 
 corpus:
   path: data/corpus.jsonl
