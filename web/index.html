@@ -114,7 +114,7 @@
 
     /* Sidebar for history */
     .sidebar {
-      width: 280px;
+      width: 320px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -551,13 +551,20 @@
     .history-item .q {
       font-size: 0.95rem;
       margin-bottom: 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      display: block;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.6;
+    }
+    .history-item .q .status-badge {
+      display: inline-block;
+      margin-bottom: 0.25rem;
+      margin-right: 0;
     }
     .history-item .meta {
       font-size: 0.8rem;
       color: var(--muted);
+      word-break: break-all;
     }
     .history-empty {
       color: var(--muted);
