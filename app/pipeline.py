@@ -29,6 +29,7 @@ from app.text import arabic
 from app.understanding import compare as cases
 from app.understanding import question as understand
 from app.validate import validate_question
+from app.retrieval import live
 
 
 @dataclass
@@ -271,6 +272,36 @@ class Pipeline:
                 c.match_score = min(1.0, c.rrf_score / denom)
 
         if not candidates:
+            # Fallback to live search when local corpus yields nothing
+            live_hits = live.live_search(original, max_results=top_k)
+            if live_hits:
+                live_candidates = []
+                for h in live_hits:
+                    live_candidates.append(
+                        Candidate(
+                            id=h.id,
+                            url=h.url,
+                            title=h.title,
+                            question="",
+                            answer="",
+                            summary="",
+                            category=h.source,
+                            match_score=0.5,
+                            rrf_score=0.0,
+                            sources={"live": 1.0},
+                            excerpts=[],
+                        )
+                    )
+                return QueryResult(
+                    query_original=original,
+                    query_restated=restated,
+                    query_normalized=norm,
+                    llm_degraded=degraded,
+                    notice="النتائج من بحث مباشر على الإنترنت (islamqa و islamweb). يرجى التحقق من المصدر قبل الاعتماد عليها.",
+                    status=EvidenceStatus.NEEDS_VERIFICATION,
+                    sensitive_group=None,
+                    candidates=live_candidates,
+                )
             return QueryResult(
                 query_original=original,
                 query_restated=restated,
